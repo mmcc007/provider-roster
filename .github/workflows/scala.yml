@@ -75,15 +75,28 @@ jobs:
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+          - name: Determine Tag Name
+            id: tag
+            run: |
+                TAG_NAME=v1.0.0-$(date +'%Y%m%d%H%M%S')
+                echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+        
+          - name: Create Tag
+            run: |
+                git tag ${{ env.TAG_NAME }}
+                git push origin ${{ env.TAG_NAME }}
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
           - name: Create Release
             id: create_release
             uses: actions/create-release@v1
             with:
-              token: ${{ secrets.GITHUB_TOKEN }}
-              tag_name: ${{ github.sha }}
-              release_name: Release ${{ github.sha }}
-              draft: false
-              prerelease: false
+                token: ${{ secrets.GITHUB_TOKEN }}
+                tag_name: ${{ env.TAG_NAME }}
+                release_name: Release ${{ env.TAG_NAME }}
+                draft: false
+                prerelease: false
 
           - name: Install GitHub CLI
             run: |
