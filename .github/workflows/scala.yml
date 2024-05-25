@@ -85,7 +85,7 @@ jobs:
             run: |
                 git tag ${{ env.TAG_NAME }}
                 git push origin ${{ env.TAG_NAME }}
-              env:
+            env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
           - name: Create Release
