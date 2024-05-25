@@ -57,6 +57,10 @@ jobs:
           needs: build
           runs-on: ubuntu-latest
           # if: github.ref == 'refs/heads/main' # Only create releases from main branch
+
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
           steps:
           - name: Checkout repository
             uses: actions/checkout@v2
@@ -83,5 +87,3 @@ jobs:
                   echo "Uploading $file"
                   gh release upload ${{ steps.create_release.outputs.upload_url }} "$file" --clobber
                 done
-            env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
