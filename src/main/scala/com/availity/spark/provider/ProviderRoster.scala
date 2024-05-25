@@ -1,32 +1,29 @@
 package com.availity.spark.provider
 
 import org.apache.spark.sql.{SparkSession, DataFrame}
-// import org.apache.spark.sql.types.{StructType, DateType, StringType}
-
 import org.apache.spark.sql.functions._
+import java.nio.file.{Files, Paths, Path}
 
 object ProviderRoster {
 
-  def process(
-      providersDF: DataFrame,
-      visitsDF: DataFrame,
-      outputPath: String
-  ): Unit = {
+
+  def process(providersDF: DataFrame, visitsDF: DataFrame, outputPath: String): Unit = {
+    // Create output directory if it doesn't exist
+    if (!Files.exists(Paths.get(outputPath))) {
+      Files.createDirectories(Paths.get(outputPath))
+    }
+
     // Rename provider_id column in providersDF to avoid ambiguity
-    val renamedProvidersDF =
-      providersDF.withColumnRenamed("provider_id", "p_id")
+    val renamedProvidersDF = providersDF.withColumnRenamed("provider_id", "p_id")
 
     // Task 1: Total number of visits per provider
-    val totalVisitsPerProviderDF =
-      totalVisitsPerProvider(visitsDF, renamedProvidersDF)
-    totalVisitsPerProviderDF.write
-      .partitionBy("provider_specialty")
-      .json(s"$outputPath/total_visits_per_provider")
+    val totalVisitsPerProviderDF = totalVisitsPerProvider(visitsDF, renamedProvidersDF)
+    totalVisitsPerProviderDF.coalesce(1).write.mode("overwrite").json(s"$outputPath/total_visits_per_provider")
 
     // Task 2: Total number of visits per provider per month
     val visitsPerMonthDF = visitsPerProviderPerMonth(visitsDF)
-    visitsPerMonthDF.write
-      .json(s"$outputPath/total_visits_per_month")
+    visitsPerMonthDF.coalesce(1).write.mode("overwrite").json(s"$outputPath/total_visits_per_month")
+
   }
 
   def totalVisitsPerProvider(

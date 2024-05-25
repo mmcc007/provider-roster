@@ -31,7 +31,7 @@ class ProviderRosterSpec
       // Set up your test data
       val providersPath = "data/providers.csv"
       val visitsPath = "data/visits.csv"
-      val outputPath = "output"
+      val outputPath = "target/output"
 
       // Read the CSV files
       val providersDF = spark.read
@@ -49,10 +49,14 @@ class ProviderRosterSpec
 
       // Add assertions to verify the results
       // Example assertion (this depends on what your process method does)
-      val resultDF: DataFrame =
+      var resultDF: DataFrame =
         spark.read.json(s"$outputPath/total_visits_per_provider")
       resultDF.show()
       assert(resultDF.count() == 1000)
+
+      resultDF = spark.read.json(s"$outputPath/total_visits_per_month")
+      resultDF.show()
+      assert(resultDF.count() == 10169)
     }
   }
 }
