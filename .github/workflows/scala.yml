@@ -53,20 +53,35 @@ jobs:
         name: spark-output
         path: target/output/**/*.json
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: ${{ github.sha }}
-          release_name: Release ${{ github.sha }}
-          draft: false
-          prerelease: false
-  
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: target/output/**/*.json
-          asset_name: spark-output-${{ github.sha }}.json
-          asset_content_type: application/json
+  release:
+          needs: build
+          runs-on: ubuntu-latest
+          # if: github.ref == 'refs/heads/main' # Only create releases from main branch
+          steps:
+          - name: Checkout repository
+            uses: actions/checkout@v2
+      
+          - name: Create Release
+            id: create_release
+            uses: actions/create-release@v1
+            with:
+              token: ${{ secrets.GITHUB_TOKEN }}
+              tag_name: ${{ github.sha }}
+              release_name: Release ${{ github.sha }}
+              draft: false
+              prerelease: false
+
+          - name: Install GitHub CLI
+            run: |
+                sudo apt-get update
+                sudo apt-get install -y gh
+                echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
+
+          - name: Upload Release Assets
+            run: |
+                for file in target/output/**/*.json; do
+                  echo "Uploading $file"
+                  gh release upload ${{ steps.create_release.outputs.upload_url }} "$file" --clobber
+                done
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
