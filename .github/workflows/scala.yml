@@ -27,6 +27,14 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: 'sbt'
+    - name: Set up Scala
+      uses: olafurpg/setup-scala@v10
+      with:
+        java-version: '11'
+        # sbt-version: '1.4.7'
+ 
+    - name: Install dependencies
+      run: sbt update
     - name: Run tests
       run: sbt test
       # Optional: This step uploads information to the GitHub dependency graph and unblocking Dependabot alerts for the repository
