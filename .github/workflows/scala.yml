@@ -10,6 +10,7 @@ on:
     branches: [ "feat/init" ]
   pull_request:
     branches: [ "feat/init" ]
+  workflow_dispatch: # This enables manual triggering of the workflow
 
 permissions:
   contents: read
@@ -65,6 +66,13 @@ jobs:
           - name: Checkout repository
             uses: actions/checkout@v2
       
+          - name: Print GITHUB_TOKEN Scopes
+            run: |
+              curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user
+              curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/${{ github.repository }}/actions/permissions/workflow
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
           - name: Create Release
             id: create_release
             uses: actions/create-release@v1
@@ -87,3 +95,5 @@ jobs:
                   echo "Uploading $file"
                   gh release upload ${{ steps.create_release.outputs.upload_url }} "$file" --clobber
                 done
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
