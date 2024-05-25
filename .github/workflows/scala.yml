@@ -104,11 +104,15 @@ jobs:
                   name: spark-output
                   path: ./artifacts
 
+          - name: Create ZIP file of JSON outputs
+            run: |
+                    cd artifacts && zip -r ../spark-output.zip .
+
           - name: Upload ZIP file as release asset
             uses: actions/upload-release-asset@v1
             with:
                   token: ${{ secrets.GITHUB_TOKEN }}
                   upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path: ./artifacts/spark-output.zip
+                  asset_path: spark-output.zip
                   asset_name: spark-output.zip
                   asset_content_type: application/zip
